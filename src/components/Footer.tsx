@@ -1,5 +1,5 @@
-import { Camera, MessageCircle } from "lucide-react";
-import { INSTAGRAM_URL, WHATSAPP_BASE_URL } from "@/data/site";
+import { Camera } from "lucide-react";
+import { INSTAGRAM_URL } from "@/data/site";
 
 export default function Footer() {
   return (
@@ -20,15 +20,6 @@ export default function Footer() {
           >
             <Camera className="h-4 w-4" />
             Instagram
-          </a>
-          <a
-            href={`${WHATSAPP_BASE_URL}?text=${encodeURIComponent("Hi Monkey Scarfs, I want to place an order.")}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#d8ff2f] px-5 text-sm font-black text-black transition hover:bg-white"
-          >
-            <MessageCircle className="h-4 w-4" />
-            WhatsApp
           </a>
         </div>
       </div>

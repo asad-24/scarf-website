@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Bebas_Neue, Inter } from "next/font/google";
+import { Toaster } from "sonner";
+import { CartProvider } from "@/components/CartProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,8 +27,14 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html
       lang="en"
       className={`${inter.variable} ${bebas.variable} h-full scroll-smooth antialiased`}
+      data-scroll-behavior="smooth"
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <CartProvider>
+          {children}
+          <Toaster richColors position="top-right" />
+        </CartProvider>
+      </body>
     </html>
   );
 }

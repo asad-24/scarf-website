@@ -1,20 +1,17 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
-import { WHATSAPP_BASE_URL } from "@/data/site";
-import type { Product } from "@/data/products";
+import type { ProductView } from "@/lib/products";
+import { formatCurrency } from "@/lib/format";
+import AddToCartButton from "@/components/AddToCartButton";
 
 type ProductCardProps = {
-  product: Product;
+  product: ProductView;
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const message = encodeURIComponent(
-    `Hi Monkey Scarfs, I want to order ${product.name}. Please share details.`
-  );
-
   return (
     <motion.article
       className="group flex h-full flex-col overflow-hidden rounded-[8px] border border-white/10 bg-[#11110f] shadow-[0_24px_80px_rgba(0,0,0,0.35)]"
@@ -26,7 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-black">
         <Image
-          src={product.image}
+          src={product.imageUrl}
           alt={`${product.name} by Monkey Scarfs`}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -37,25 +34,24 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.category}
         </div>
         <div className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-black text-black backdrop-blur">
-          {product.price}
+          {formatCurrency(product.price)}
         </div>
       </div>
       <div className="flex flex-1 flex-col justify-between gap-5 p-6">
         <div>
-          <h3 className="font-display text-4xl leading-[0.95] text-[#f8f4ea]">{product.name}</h3>
+          <Link href={`/products/${product.slug}`}>
+            <h3 className="font-display text-4xl leading-[0.95] text-[#f8f4ea] transition hover:text-[#d8ff2f]">
+              {product.name}
+            </h3>
+          </Link>
           <p className="mt-4 min-h-14 text-sm leading-7 text-white/58">
             {product.description}
           </p>
         </div>
-        <a
-          href={`${WHATSAPP_BASE_URL}?text=${message}`}
-          target="_blank"
-          rel="noreferrer"
+        <AddToCartButton
+          product={product}
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#d8ff2f] px-4 text-sm font-black text-[#080807] transition hover:bg-white"
-        >
-          <MessageCircle className="h-4 w-4" />
-          Order Now
-        </a>
+        />
       </div>
     </motion.article>
   );

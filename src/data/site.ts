@@ -1,7 +1,5 @@
 export const INSTAGRAM_URL = "https://www.instagram.com/monkeyscarfs";
 
-export const WHATSAPP_BASE_URL = "https://wa.me/000000000000";
-
 export const brandStats = [
   { value: "25", label: "Real asset previews" },
   { value: "3", label: "Simple order steps" },
