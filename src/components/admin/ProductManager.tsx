@@ -19,6 +19,16 @@ type FormState = {
   featured: boolean;
 };
 
+type ApiErrorPayload = {
+  error?: string;
+  details?: Record<string, string[]>;
+};
+
+type FormError = {
+  message: string;
+  details: Record<string, string[]>;
+};
+
 const emptyForm: FormState = {
   name: "",
   description: "",
@@ -30,9 +40,17 @@ const emptyForm: FormState = {
   featured: false,
 };
 
+function parseFormError(data: ApiErrorPayload): FormError {
+  return {
+    message: data.error || "Could not save product.",
+    details: data.details ?? {},
+  };
+}
+
 export default function ProductManager({ initialProducts }: { initialProducts: ProductView[] }) {
   const [products, setProducts] = useState(initialProducts);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [formError, setFormError] = useState<FormError | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ProductView | null>(null);
@@ -44,6 +62,7 @@ export default function ProductManager({ initialProducts }: { initialProducts: P
   );
 
   function editProduct(product: ProductView) {
+    setFormError(null);
     setForm({
       id: product.id,
       name: product.name,
@@ -85,6 +104,7 @@ export default function ProductManager({ initialProducts }: { initialProducts: P
 
   async function saveProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFormError(null);
     setSaving(true);
     try {
       const payload = {
@@ -104,7 +124,8 @@ export default function ProductManager({ initialProducts }: { initialProducts: P
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Could not save product.");
+        setFormError(parseFormError(data));
+        return;
       }
       setProducts((current) =>
         form.id
@@ -114,7 +135,10 @@ export default function ProductManager({ initialProducts }: { initialProducts: P
       setForm(emptyForm);
       toast.success("Product saved");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save product.");
+      setFormError({
+        message: error instanceof Error ? error.message : "Could not save product.",
+        details: {},
+      });
     } finally {
       setSaving(false);
     }
@@ -148,6 +172,26 @@ export default function ProductManager({ initialProducts }: { initialProducts: P
           <Plus className="h-5 w-5 text-[#d8ff2f]" />
           {form.id ? "Edit product" : "Add product"}
         </h2>
+        {formError ? (
+          <div
+            className="mt-4 rounded-[8px] border border-red-400/35 bg-red-500/10 p-4 text-sm text-red-100"
+            role="alert"
+            aria-live="polite"
+          >
+            <p className="font-black">{formError.message}</p>
+            {Object.entries(formError.details).length ? (
+              <ul className="mt-2 space-y-1 text-red-100/85">
+                {Object.entries(formError.details).flatMap(([field, messages]) =>
+                  messages.map((message) => (
+                    <li key={`${field}-${message}`}>
+                      <span className="font-bold capitalize">{field}</span>: {message}
+                    </li>
+                  ))
+                )}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
         <div className="mt-5 space-y-4">
           <input required placeholder="Product name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} className="h-11 w-full rounded-[8px] border border-white/12 bg-black px-4 text-sm text-white outline-none" />
           <input required placeholder="Price" type="number" min="1" value={form.price} onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))} className="h-11 w-full rounded-[8px] border border-white/12 bg-black px-4 text-sm text-white outline-none" />
@@ -175,7 +219,7 @@ export default function ProductManager({ initialProducts }: { initialProducts: P
             {saving ? "Saving..." : "Save"}
           </button>
           {form.id ? (
-            <button type="button" onClick={() => setForm(emptyForm)} className="h-11 rounded-full border border-white/12 px-5 text-sm font-black text-white/70">
+            <button type="button" onClick={() => { setForm(emptyForm); setFormError(null); }} className="h-11 rounded-full border border-white/12 px-5 text-sm font-black text-white/70">
               Cancel
             </button>
           ) : null}
